@@ -59,11 +59,31 @@ struct Palette {
 
 impl Palette {
     fn from_cli(cli: &Cli) -> Self {
-        Self {
+        let mut palette = Self {
             background: valid_color(&cli.background, DEFAULT_BACKGROUND),
             foreground: valid_color(&cli.foreground, DEFAULT_FOREGROUND),
             accent: valid_color(&cli.accent, DEFAULT_ACCENT),
+        };
+        if let Some((background, foreground)) = theme_colors(&cli.theme) {
+            palette.background = background.to_owned();
+            palette.foreground = foreground.to_owned();
         }
+        palette
+    }
+}
+
+fn theme_colors(theme: &str) -> Option<(&'static str, &'static str)> {
+    let normalized = theme.trim().to_ascii_lowercase().replace(['_', ' '], "-");
+    let normalized = normalized.strip_prefix("argvus-").unwrap_or(&normalized);
+    let normalized = normalized.strip_suffix("-float").unwrap_or(normalized);
+
+    match normalized {
+        "dark-aether" => Some(("#191b27", "#3590bd")),
+        "dark-silver" => Some(("#595959", "#333647")),
+        "dark-slate" => Some(("#3b4352", "#7391a5")),
+        "dark-universe" => Some(("#000000", "#ffffff")),
+        "light-veil" => Some(("#ffffff", "#000000")),
+        _ => None,
     }
 }
 
@@ -317,5 +337,49 @@ mod tests {
         assert_eq!(Palette::from_cli(&cli).background, DEFAULT_BACKGROUND);
         assert_eq!(Palette::from_cli(&cli).foreground, DEFAULT_FOREGROUND);
         assert_eq!(Palette::from_cli(&cli).accent, DEFAULT_ACCENT);
+    }
+
+    #[test]
+    fn known_theme_names_select_their_main_colors() {
+        let cases = [
+            ("ARGVUS Dark Aether", "#191b27", "#3590bd"),
+            ("argvus-dark-silver-float", "#595959", "#333647"),
+            ("ARGVUS Dark Slate", "#3b4352", "#7391a5"),
+            ("argvus-dark-universe", "#000000", "#ffffff"),
+            ("ARGVUS Light Veil", "#ffffff", "#000000"),
+        ];
+
+        for (theme, background, foreground) in cases {
+            let cli = Cli::try_parse_from([
+                "argvus-theme-splash",
+                "--theme",
+                theme,
+                "--background",
+                "#abcdef",
+                "--foreground",
+                "#123456",
+            ])
+            .unwrap();
+            let palette = Palette::from_cli(&cli);
+            assert_eq!(palette.background, background);
+            assert_eq!(palette.foreground, foreground);
+        }
+    }
+
+    #[test]
+    fn unknown_theme_keeps_explicit_cli_colors() {
+        let cli = Cli::try_parse_from([
+            "argvus-theme-splash",
+            "--theme",
+            "custom-theme",
+            "--background",
+            "#abcdef",
+            "--foreground",
+            "#123456",
+        ])
+        .unwrap();
+        let palette = Palette::from_cli(&cli);
+        assert_eq!(palette.background, "#abcdef");
+        assert_eq!(palette.foreground, "#123456");
     }
 }
