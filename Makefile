@@ -4,8 +4,7 @@ INSTALL ?= install
 RM ?= rm -f
 CARGO ?= cargo
 
-BIN_NAME := argvus-theme-splash
-BIN := target/release/$(BIN_NAME)
+BIN := target/release/splash
 
 .DEFAULT_GOAL := help
 
@@ -26,14 +25,19 @@ help:
 	@echo "  make clean"
 
 build:
-	@tools/build-local-package.sh
+	@$(MAKE) package
+
+package: check
+	@tools/sh/pkgbuild_local.sh
+
+pkg: package
 
 build-bin:
-	$(CARGO) build --release --locked
+	$(CARGO) build --workspace --release --locked
 
 check:
-	$(CARGO) clippy --locked --all-targets --all-features -- -D warnings
-	$(CARGO) test --locked
+	$(CARGO) clippy --workspace --locked --all-targets --all-features -- -D warnings
+	$(CARGO) test --workspace --locked
 
 lint: check
 
@@ -41,28 +45,27 @@ fmt:
 	$(CARGO) fmt
 
 fmt-check:
-	$(CARGO) fmt --check
+	$(CARGO) fmt --all -- --check
 
 validate: fmt-check check validate-pkgbuild
 
 validate-pkgbuild:
 	@if command -v makepkg >/dev/null 2>&1; then \
-		cd packaging/arch && makepkg -p PKGBUILD --printsrcinfo >/dev/null && makepkg -p PKGBUILD.local --printsrcinfo >/dev/null; \
+		cd packaging/arch/ci && makepkg -p PKGBUILD --printsrcinfo >/dev/null; \
+		cd ../local && makepkg -p PKGBUILD --printsrcinfo >/dev/null; \
 	else \
 		echo "makepkg not found; skipping PKGBUILD syntax validation"; \
 	fi
 
 install: build-bin
-	$(INSTALL) -Dm755 "$(BIN)" "$(DESTDIR)$(PREFIX)/bin/$(BIN_NAME)"
-	$(INSTALL) -Dm644 LICENSE "$(DESTDIR)$(PREFIX)/share/licenses/argvus-theme-splash/LICENSE"
+	@sudo pacman -U build/dist/argvus*.zst --noconfirm --overwrite="*"
 
 uninstall:
-	$(RM) "$(DESTDIR)$(PREFIX)/bin/$(BIN_NAME)"
+	$(RM) "$(DESTDIR)$(PREFIX)/lib/argvus/theme-splash/splash"
 	rm -rf "$(DESTDIR)$(PREFIX)/share/licenses/argvus-theme-splash"
 
 reinstall: uninstall install
 
 clean:
 	$(CARGO) clean
-	rm -rf dist
-	rm -f packaging/arch/*.zst packaging/arch/*.tar.gz
+	rm -rf dist build

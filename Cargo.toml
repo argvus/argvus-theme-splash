@@ -1,12 +1,19 @@
-[package]
-name = "argvus-theme-splash"
+[workspace]
+resolver = "2"
+members = ["crates/core", "crates/main"]
+
+[workspace.package]
 version = "0.1.0"
 edition = "2024"
 license = "GPL-3.0-only"
-description = "Wayland layer-shell overlay used during ARGVUS theme transitions"
+rust-version = "1.95"
+authors = ["ARGVUS"]
 repository = "https://github.com/argvus/argvus-theme-splash"
+homepage = "https://github.com/argvus/argvus-theme-splash"
+description = "Wayland layer-shell overlay used during ARGVUS theme transitions"
 
-[dependencies]
+[workspace.dependencies]
+argvus-theme-splash-core = { path = "crates/core" }
 argvus-i18n = { path = "../argvus-i18n" }
 clap = { version = "4.5", features = ["derive"] }
 gtk = { package = "gtk4", version = "0.11.4", features = ["v4_12"] }
@@ -15,6 +22,6 @@ libc = "0.2"
 signal-hook = "0.3"
 
 [profile.release]
-strip = "symbols"
-lto = "thin"
+lto = true
+strip = true
 codegen-units = 1

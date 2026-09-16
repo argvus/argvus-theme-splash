@@ -19,23 +19,28 @@ makedepends=(
 source=("${pkgname}-${pkgver}.tar.gz")
 sha256sums=('SKIP')
 
+_source_dir() {
+  find "${srcdir}" -mindepth 1 -maxdepth 1 -type d -name "${pkgname}-*" -print -quit
+}
+
 prepare() {
-  cd "${pkgname}-${pkgver}"
+  cd "$(_source_dir)"
   cargo fetch --locked --target "${CARCH}-unknown-linux-gnu"
 }
 
 build() {
-  cd "${pkgname}-${pkgver}"
-  cargo build --release --locked --target-dir target
+  cd "$(_source_dir)"
+  cargo build --workspace --release --locked
 }
 
 check() {
-  cd "${pkgname}-${pkgver}"
-  cargo test --locked --target-dir target
+  cd "$(_source_dir)"
+  cargo test --workspace --release --locked
 }
 
 package() {
-  cd "${pkgname}-${pkgver}"
-  install -Dm755 target/release/${pkgname} "${pkgdir}/usr/bin/${pkgname}"
+  cd "$(_source_dir)"
+  install -Dm755 target/release/splash "${pkgdir}/usr/lib/argvus/theme-splash/splash"
+  install -Dm644 README.md "${pkgdir}/usr/share/doc/${pkgname}/README.md"
   install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
 }

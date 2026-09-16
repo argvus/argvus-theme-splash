@@ -64,12 +64,17 @@ name = "argvus-theme-splash"
 version = "0.1.0"
 dependencies = [
  "argvus-i18n",
+ "argvus-theme-splash-core",
  "clap",
  "gtk4",
  "gtk4-layer-shell",
  "libc",
  "signal-hook",
 ]
+
+[[package]]
+name = "argvus-theme-splash-core"
+version = "0.1.0"
 
 [[package]]
 name = "autocfg"

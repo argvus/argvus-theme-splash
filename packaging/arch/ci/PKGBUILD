@@ -1,0 +1,45 @@
+# Maintainer: William C. Canin
+pkgname=argvus-theme-splash
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="GTK4 Wayland layer-shell overlay for ARGVUS theme transitions"
+arch=('x86_64')
+url="https://github.com/argvus/argvus-theme-splash"
+license=('GPL-3.0-only')
+options=('!debug')
+depends=('argvus-i18n' 'gtk4' 'gtk4-layer-shell')
+makedepends=('cargo' 'pkgconf')
+source=(
+  "${pkgname}-${pkgver}.tar.gz::${url}/archive/refs/tags/v${pkgver}.tar.gz"
+  "argvus-i18n-main.tar.gz::https://github.com/argvus/argvus-i18n/archive/refs/heads/main.tar.gz"
+)
+sha256sums=('SKIP' 'SKIP')
+
+_source_dir() {
+  find "${srcdir}" -mindepth 1 -maxdepth 1 -type d -name "${pkgname}-*" -print -quit
+}
+
+prepare() {
+  i18n_dir="$(find "${srcdir}" -mindepth 1 -maxdepth 1 -type d -name 'argvus-i18n*' -print -quit)"
+  [[ -n "$i18n_dir" ]] || { echo "argvus-i18n source directory was not extracted." >&2; return 1; }
+  mv "$i18n_dir" "${srcdir}/argvus-i18n"
+  cd "$(_source_dir)"
+  cargo fetch --workspace --locked --target "${CARCH}-unknown-linux-gnu"
+}
+
+build() {
+  cd "$(_source_dir)"
+  cargo build --workspace --release --locked
+}
+
+check() {
+  cd "$(_source_dir)"
+  cargo test --workspace --release --locked
+}
+
+package() {
+  cd "$(_source_dir)"
+  install -Dm755 target/release/splash "${pkgdir}/usr/lib/argvus/theme-splash/splash"
+  install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+  install -Dm644 README.md "${pkgdir}/usr/share/doc/${pkgname}/README.md"
+}

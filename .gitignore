@@ -1,5 +1,11 @@
-/target/
+/target
 /tmp
+/build
 *.zst
 argvus*.tar.gz
 /dist/
+packaging/arch/ci/src/
+packaging/arch/ci/pkg/
+packaging/arch/local/src/
+packaging/arch/local/pkg/
+packaging/arch/local/PKGBUILD.local
