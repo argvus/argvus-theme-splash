@@ -53,7 +53,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "argvus-i18n"
+name = "argvus-i18n-core"
 version = "0.1.0"
 dependencies = [
  "serde_json",
@@ -63,7 +63,7 @@ dependencies = [
 name = "argvus-theme-splash"
 version = "0.1.0"
 dependencies = [
- "argvus-i18n",
+ "argvus-i18n-core",
  "argvus-theme-splash-core",
  "clap",
  "gtk4",

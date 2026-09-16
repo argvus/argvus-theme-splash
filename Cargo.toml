@@ -14,7 +14,7 @@ description = "Wayland layer-shell overlay used during ARGVUS theme transitions"
 
 [workspace.dependencies]
 argvus-theme-splash-core = { path = "crates/core" }
-argvus-i18n = { path = "../argvus-i18n" }
+argvus-i18n = { package = "argvus-i18n-core", path = "../argvus-i18n/crates/core" }
 clap = { version = "4.5", features = ["derive"] }
 gtk = { package = "gtk4", version = "0.11.4", features = ["v4_12"] }
 gtk4-layer-shell = "0.8.1"
