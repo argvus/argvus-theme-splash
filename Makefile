@@ -8,7 +8,7 @@ BIN := target/release/splash
 
 .DEFAULT_GOAL := help
 
-.PHONY: help build build-bin check lint fmt fmt-check validate validate-pkgbuild install uninstall reinstall clean
+.PHONY: help build build-bin check lint lint-shell fmt fmt-check validate validate-pkgbuild install uninstall reinstall clean
 
 help:
 	@echo "Available targets:"
@@ -39,7 +39,21 @@ check:
 	$(CARGO) clippy --workspace --locked --all-targets --all-features -- -D warnings
 	$(CARGO) test --workspace --locked
 
-lint: check
+lint-shell:
+	@for root in tools packaging/arch/common src; do \
+		if [ -d "$$root" ]; then \
+			find "$$root" -type f -name '*.sh' -exec shellcheck -e SC1090 -e SC2034 -e SC2154 {} +; \
+		fi; \
+	done
+	@for root in tools packaging/arch/common src; do \
+		if [ -d "$$root" ]; then \
+			find "$$root" -type f -name '*.sh' -exec bash -n {} +; \
+		fi; \
+	done
+	@git diff --check
+	@echo "Lint Shell OK"
+
+lint: lint-shell check
 
 fmt:
 	$(CARGO) fmt
