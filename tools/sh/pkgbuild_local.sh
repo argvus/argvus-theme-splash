@@ -7,13 +7,14 @@ I18N_DIR="$(cd -- "$ROOT_DIR/../argvus-i18n" && pwd)"
 BUILD_DIR="$ROOT_DIR/build"
 ARTIFACTS_DIR="$BUILD_DIR/artifacts"
 DIST_DIR="$BUILD_DIR/dist"
+CARGO_TARGET_DIR="$BUILD_DIR/cargo-target"
 PKGBUILD_DIR="$ROOT_DIR/packaging/arch/local"
 PKGBUILD="$PKGBUILD_DIR/PKGBUILD"
 
 [[ -d "$I18N_DIR" ]] || { echo "Sibling crate argvus-i18n not found at $I18N_DIR." >&2; exit 1; }
 
 read -r pkgname pkgver <<<"$(bash -c 'source "$1"; printf "%s %s" "$pkgname" "$pkgver"' bash "$PKGBUILD")"
-mkdir -p "$ARTIFACTS_DIR" "$DIST_DIR"
+mkdir -p "$ARTIFACTS_DIR" "$CARGO_TARGET_DIR" "$DIST_DIR"
 find "$DIST_DIR" -maxdepth 1 -type f -name "${pkgname}-*.pkg.tar.*" -delete
 
 archive="$ARTIFACTS_DIR/${pkgname}-${pkgver}.tar.gz"
@@ -23,13 +24,15 @@ trap cleanup EXIT
 mkdir -p "$staging/${pkgname}-${pkgver}" "$staging/argvus-i18n"
 
 tar -cf - \
-  --exclude='./.git' --exclude='./build' --exclude='./dist' --exclude='./target' \
+  --exclude='./.git' --exclude='./build' --exclude='*/build' \
+  --exclude='./dist' --exclude='*/dist' --exclude='./target' --exclude='*/target' \
   --exclude='./packaging/arch/ci/src' --exclude='./packaging/arch/ci/pkg' \
   --exclude='./packaging/arch/local/src' --exclude='./packaging/arch/local/pkg' \
   --exclude='./packaging/arch/local/PKGBUILD.local' \
   --exclude='./packaging/arch/*.tar.gz' --exclude='./tools' \
   -C "$ROOT_DIR" . | tar -xf - -C "$staging/${pkgname}-${pkgver}"
-tar -cf - --exclude='./.git' --exclude='./target' --exclude='./dist' \
+tar -cf - --exclude='./.git' --exclude='./build' --exclude='*/build' \
+  --exclude='./target' --exclude='*/target' --exclude='./dist' --exclude='*/dist' \
   -C "$I18N_DIR" . | tar -xf - -C "$staging/argvus-i18n"
 tar -czf "$archive" -C "$staging" "${pkgname}-${pkgver}" argvus-i18n
 
@@ -45,7 +48,7 @@ else
   flags=(--nodeps --noconfirm --needed --cleanbuild --clean --force --check)
 fi
 cd "$PKGBUILD_DIR"
-export BUILDDIR="$ARTIFACTS_DIR" SRCDEST="$ARTIFACTS_DIR" PKGDEST="$DIST_DIR"
+export BUILDDIR="$ARTIFACTS_DIR" SRCDEST="$ARTIFACTS_DIR" PKGDEST="$DIST_DIR" CARGO_TARGET_DIR
 makepkg -p PKGBUILD.local "${flags[@]}" "$@"
 printf 'Packages created in %s:\n' "$DIST_DIR"
 find "$DIST_DIR" -maxdepth 1 -type f -name "${pkgname}-*.pkg.tar.zst" -printf '  %f\n' | sort

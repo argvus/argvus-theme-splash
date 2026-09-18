@@ -23,6 +23,10 @@ _source_dir() {
   find "${srcdir}" -mindepth 1 -maxdepth 1 -type d -name "${pkgname}-*" -print -quit
 }
 
+_cargo_target_dir() {
+  printf '%s' "${CARGO_TARGET_DIR:-$(_source_dir)/target}"
+}
+
 prepare() {
   cd "$(_source_dir)"
   cargo fetch --locked --target "${CARCH}-unknown-linux-gnu"
@@ -40,7 +44,7 @@ check() {
 
 package() {
   cd "$(_source_dir)"
-  install -Dm755 target/release/splash "${pkgdir}/usr/lib/argvus/theme-splash/splash"
+  install -Dm755 "$(_cargo_target_dir)/release/splash" "${pkgdir}/usr/lib/argvus/theme-splash/splash"
   install -Dm644 README.md "${pkgdir}/usr/share/doc/${pkgname}/README.md"
   install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
 }
