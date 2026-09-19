@@ -2,7 +2,7 @@
 pkgname=argvus-theme-splash
 pkgver=0.1.0
 pkgrel=1
-pkgdesc="GTK4 Wayland layer-shell overlay for ARGVUS theme transitions"
+pkgdesc="GTK4 Wayland layer-shell overlay for ARGVUS theme and session transitions"
 arch=('x86_64')
 url="https://github.com/argvus/argvus-theme-splash"
 license=('GPL-3.0-only')

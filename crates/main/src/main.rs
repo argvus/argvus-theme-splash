@@ -1,5 +1,6 @@
 use std::{
   cell::RefCell,
+  env,
   fs::File,
   io::Write,
   os::fd::FromRawFd,
@@ -27,11 +28,11 @@ const FADE_OUT_MS: u32 = 220;
 #[derive(Debug, Parser, Clone)]
 #[command(
   name = "argvus-theme-splash",
-  about = "Overlay shown while ARGVUS changes theme"
+  about = "Overlay shown while ARGVUS changes theme or starts the desktop"
 )]
 struct Cli {
-  #[arg(long, default_value = "ARGVUS")]
-  theme: String,
+  #[arg(long)]
+  theme: Option<String>,
   #[arg(long, default_value = DEFAULT_BACKGROUND)]
   background: String,
   #[arg(long, default_value = DEFAULT_FOREGROUND)]
@@ -46,6 +47,9 @@ struct Cli {
   /// Write READY to an inherited file descriptor after mapping.
   #[arg(long)]
   ready_fd: Option<i32>,
+  /// Render only the spinner, without the theme-transition message.
+  #[arg(long)]
+  spinner_only: bool,
 }
 
 #[derive(Clone)]
@@ -57,17 +61,44 @@ struct Palette {
 
 impl Palette {
   fn from_cli(cli: &Cli) -> Self {
+    let theme = cli
+      .theme
+      .as_deref()
+      .map(ToOwned::to_owned)
+      .unwrap_or_else(active_theme_name);
     let mut palette = Self {
       background: argvus_theme_splash_core::valid_color(&cli.background, DEFAULT_BACKGROUND),
       foreground: argvus_theme_splash_core::valid_color(&cli.foreground, DEFAULT_FOREGROUND),
       accent: argvus_theme_splash_core::valid_color(&cli.accent, DEFAULT_ACCENT),
     };
-    if let Some((background, foreground)) = argvus_theme_splash_core::theme_colors(&cli.theme) {
+    if let Some((background, foreground)) = argvus_theme_splash_core::theme_colors(&theme) {
       palette.background = background.to_owned();
       palette.foreground = foreground.to_owned();
     }
     palette
   }
+}
+
+fn active_theme_name() -> String {
+  let config_home = env::var_os("ARGVUS_CONFIG_HOME")
+    .or_else(|| env::var_os("XDG_CONFIG_HOME"))
+    .or_else(|| {
+      env::var_os("HOME").map(|home| {
+        std::path::PathBuf::from(home)
+          .join(".config")
+          .into_os_string()
+      })
+    })
+    .map(std::path::PathBuf::from);
+
+  config_home
+    .map(|path| path.join("argvus/.active-theme"))
+    .and_then(|path| std::fs::read_to_string(path).ok())
+    .and_then(|theme| {
+      let theme = theme.trim();
+      (!theme.is_empty()).then(|| theme.to_owned())
+    })
+    .unwrap_or_else(|| "argvus-dark-aether".to_owned())
 }
 
 fn css(palette: &Palette) -> String {
@@ -120,7 +151,7 @@ fn build_surfaces(application: &Application, cli: &Cli, palette: &Palette) {
     let Ok(monitor) = item.downcast::<gdk::Monitor>() else {
       continue;
     };
-    let window = make_surface(application, &monitor, palette);
+    let window = make_surface(application, &monitor, palette, cli.spinner_only);
     window.present();
     surfaces.borrow_mut().push(window);
   }
@@ -135,13 +166,22 @@ fn build_surfaces(application: &Application, cli: &Cli, palette: &Palette) {
 
   let fade_state = Rc::new(RefCell::new(FadeState::new(surfaces.borrow().clone())));
   install_signal_handlers(&fade_state);
-  start_fade_in(&fade_state);
+  if cli.spinner_only {
+    // Session startup must expose feedback on the first mapped frame; the
+    // transition fade is reserved for interactive theme changes.
+    for window in &fade_state.borrow().windows {
+      window.set_opacity(1.0);
+    }
+  } else {
+    start_fade_in(&fade_state);
+  }
 }
 
 fn make_surface(
   application: &Application,
   monitor: &gdk::Monitor,
   palette: &Palette,
+  spinner_only: bool,
 ) -> ApplicationWindow {
   let window = ApplicationWindow::builder()
     .application(application)
@@ -186,13 +226,15 @@ fn make_surface(
   spinner.set_width_request(24);
   spinner.set_height_request(24);
   spinner.start();
-  let applying = Label::new(Some(&tr_applying()));
-  applying.add_css_class("caption");
-  applying.set_halign(Align::Center);
   content.append(&spinner);
-  content.append(&applying);
+  if !spinner_only {
+    let applying = Label::new(Some(&tr_applying()));
+    applying.add_css_class("caption");
+    applying.set_halign(Align::Center);
+    content.append(&applying);
+  }
   window.set_child(Some(&content));
-  window.set_opacity(0.0);
+  window.set_opacity(if spinner_only { 1.0 } else { 0.0 });
   window
 }
 
@@ -315,9 +357,10 @@ mod tests {
 
   #[test]
   fn cli_defaults_are_safe() {
-    let cli = Cli::try_parse_from(["argvus-theme-splash"]).unwrap();
-    assert_eq!(Palette::from_cli(&cli).background, DEFAULT_BACKGROUND);
-    assert_eq!(Palette::from_cli(&cli).foreground, DEFAULT_FOREGROUND);
+    let cli =
+      Cli::try_parse_from(["argvus-theme-splash", "--theme", "argvus-dark-aether"]).unwrap();
+    assert_eq!(Palette::from_cli(&cli).background, "#191b27");
+    assert_eq!(Palette::from_cli(&cli).foreground, "#3590bd");
     assert_eq!(Palette::from_cli(&cli).accent, DEFAULT_ACCENT);
   }
 

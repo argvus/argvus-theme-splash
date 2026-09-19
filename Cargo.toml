@@ -10,7 +10,7 @@ rust-version = "1.95"
 authors = ["ARGVUS"]
 repository = "https://github.com/argvus/argvus-theme-splash"
 homepage = "https://github.com/argvus/argvus-theme-splash"
-description = "Wayland layer-shell overlay used during ARGVUS theme transitions"
+description = "Wayland layer-shell overlay used during ARGVUS theme and session transitions"
 
 [workspace.dependencies]
 argvus-theme-splash-core = { path = "crates/core" }
