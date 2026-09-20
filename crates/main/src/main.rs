@@ -50,6 +50,12 @@ struct Cli {
   /// Render only the spinner, without the theme-transition message.
   #[arg(long)]
   spinner_only: bool,
+  /// Marks a spinner started during a greeter-to-session handoff.
+  ///
+  /// The flag is intentionally behavioural-neutral: process lifetime remains
+  /// controlled by the existing SIGTERM path.
+  #[arg(long)]
+  session_handoff: bool,
 }
 
 #[derive(Clone)]
@@ -156,13 +162,32 @@ fn build_surfaces(application: &Application, cli: &Cli, palette: &Palette) {
     surfaces.borrow_mut().push(window);
   }
 
-  // The idle runs after present() has dispatched the map requests, which is
-  // the point at which the compositor can display the layer-shell surfaces.
+  // Do not report readiness from main or an idle callback. A layer-shell
+  // surface has not necessarily entered a compositor frame at either point.
+  // Every output reports from its first GTK frame callback instead.
   let ready_file = cli.ready_file.clone();
   let ready_fd = cli.ready_fd;
-  glib::idle_add_local_once(move || {
+  let pending_frames = Rc::new(RefCell::new(surfaces.borrow().len()));
+  if *pending_frames.borrow() == 0 {
     signal_ready(ready_file.as_deref(), ready_fd);
-  });
+  } else {
+    for window in surfaces.borrow().iter() {
+      let pending_frames = Rc::clone(&pending_frames);
+      let ready_file = ready_file.clone();
+      window.add_tick_callback(move |_, _| {
+        let mut pending = pending_frames.borrow_mut();
+        *pending = pending.saturating_sub(1);
+        if *pending == 0 {
+          let monotonic_ns = monotonic_ns();
+          eprintln!(
+            "argvus-theme-splash: monotonic_ns={monotonic_ns} first layer-shell frame callback"
+          );
+          signal_ready(ready_file.as_deref(), ready_fd);
+        }
+        glib::ControlFlow::Break
+      });
+    }
+  }
 
   let fade_state = Rc::new(RefCell::new(FadeState::new(surfaces.borrow().clone())));
   install_signal_handlers(&fade_state);
@@ -316,6 +341,18 @@ fn signal_ready(path: Option<&str>, fd: Option<i32>) {
     // The descriptor is explicitly handed to this process by the caller.
     let mut file = unsafe { File::from_raw_fd(fd) };
     let _ = file.write_all(b"READY\n");
+  }
+}
+
+fn monotonic_ns() -> u128 {
+  let mut value = libc::timespec {
+    tv_sec: 0,
+    tv_nsec: 0,
+  };
+  if unsafe { libc::clock_gettime(libc::CLOCK_MONOTONIC, &mut value) } == 0 {
+    value.tv_sec as u128 * 1_000_000_000 + value.tv_nsec as u128
+  } else {
+    0
   }
 }
 
