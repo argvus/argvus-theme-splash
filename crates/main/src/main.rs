@@ -77,9 +77,10 @@ impl Palette {
       foreground: argvus_theme_splash_core::valid_color(&cli.foreground, DEFAULT_FOREGROUND),
       accent: argvus_theme_splash_core::valid_color(&cli.accent, DEFAULT_ACCENT),
     };
-    if let Some((background, foreground)) = argvus_theme_splash_core::theme_colors(&theme) {
+    if let Some((background, foreground, accent)) = argvus_theme_splash_core::theme_colors(&theme) {
       palette.background = background.to_owned();
       palette.foreground = foreground.to_owned();
+      palette.accent = accent.to_owned();
     }
     palette
   }
@@ -404,14 +405,14 @@ mod tests {
   #[test]
   fn known_theme_names_select_their_main_colors() {
     let cases = [
-      ("ARGVUS Dark Aether", "#191b27", "#3590bd"),
-      ("argvus-dark-silver-float", "#595959", "#333647"),
-      ("ARGVUS Dark Slate", "#3b4352", "#7391a5"),
-      ("argvus-dark-universe", "#000000", "#ffffff"),
-      ("ARGVUS Light Veil", "#ffffff", "#000000"),
+      ("ARGVUS Dark Aether", "#191b27", "#3590bd", DEFAULT_ACCENT),
+      ("argvus-dark-silver-float", "#595959", "#121518", "#121518"),
+      ("ARGVUS Dark Slate", "#3b4352", "#7391a5", DEFAULT_ACCENT),
+      ("argvus-dark-universe", "#000000", "#ffffff", DEFAULT_ACCENT),
+      ("ARGVUS Light Veil", "#ffffff", "#000000", DEFAULT_ACCENT),
     ];
 
-    for (theme, background, foreground) in cases {
+    for (theme, background, foreground, accent) in cases {
       let cli = Cli::try_parse_from([
         "argvus-theme-splash",
         "--theme",
@@ -425,6 +426,7 @@ mod tests {
       let palette = Palette::from_cli(&cli);
       assert_eq!(palette.background, background);
       assert_eq!(palette.foreground, foreground);
+      assert_eq!(palette.accent, accent);
     }
   }
 
