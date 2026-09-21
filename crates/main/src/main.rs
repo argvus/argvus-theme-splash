@@ -37,8 +37,8 @@ struct Cli {
   background: String,
   #[arg(long, default_value = DEFAULT_FOREGROUND)]
   foreground: String,
-  #[arg(long, default_value = DEFAULT_ACCENT)]
-  accent: String,
+  #[arg(long)]
+  accent: Option<String>,
   #[arg(long)]
   logo: Option<String>,
   /// Write READY after every monitor surface has been mapped.
@@ -75,12 +75,15 @@ impl Palette {
     let mut palette = Self {
       background: argvus_theme_splash_core::valid_color(&cli.background, DEFAULT_BACKGROUND),
       foreground: argvus_theme_splash_core::valid_color(&cli.foreground, DEFAULT_FOREGROUND),
-      accent: argvus_theme_splash_core::valid_color(&cli.accent, DEFAULT_ACCENT),
+      accent: DEFAULT_ACCENT.to_owned(),
     };
     if let Some((background, foreground, accent)) = argvus_theme_splash_core::theme_colors(&theme) {
       palette.background = background.to_owned();
       palette.foreground = foreground.to_owned();
       palette.accent = accent.to_owned();
+    }
+    if let Some(accent) = cli.accent.as_deref() {
+      palette.accent = argvus_theme_splash_core::valid_color(accent, &palette.accent);
     }
     palette
   }
@@ -428,6 +431,19 @@ mod tests {
       assert_eq!(palette.foreground, foreground);
       assert_eq!(palette.accent, accent);
     }
+  }
+
+  #[test]
+  fn explicit_accent_overrides_known_theme_accent() {
+    let cli = Cli::try_parse_from([
+      "argvus-theme-splash",
+      "--theme",
+      "argvus-dark-silver",
+      "--accent",
+      "#123456",
+    ])
+    .unwrap();
+    assert_eq!(Palette::from_cli(&cli).accent, "#123456");
   }
 
   #[test]
