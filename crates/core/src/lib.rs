@@ -9,11 +9,18 @@ pub fn theme_colors(theme: &str) -> Option<(&'static str, &'static str, &'static
   let normalized = normalized.strip_prefix("argvus-").unwrap_or(&normalized);
   let normalized = normalized.strip_suffix("-float").unwrap_or(normalized);
   match normalized {
+    "onedark" | "one-dark" => Some(("#282C34", "#ABB2BF", "#61AFEF")),
+    "dracula" => Some(("#282A36", "#F8F8F2", "#BD93F9")),
     "dark-aether" => Some(("#191b27", "#3590bd", DEFAULT_ACCENT)),
     "dark-silver" => Some(("#595959", "#121518", "#121518")),
+    "rosepine" => Some(("#191724", "#E0DEF4", "#C4A7E7")),
     "dark-slate" => Some(("#3b4352", "#7391a5", DEFAULT_ACCENT)),
     "dark-universe" => Some(("#000000", "#ffffff", DEFAULT_ACCENT)),
+    "gruvbox-dark-medium" => Some(("#282828", "#EBDBB2", "#D79921")),
     "light-veil" => Some(("#ffffff", "#000000", DEFAULT_ACCENT)),
+    "frost" => Some(("#f6f8fa", "#24292f", "#0969da")),
+    "tokyo-night" => Some(("#1A1B26", "#C0CAF5", "#7AA2F7")),
+    "catppuccin-latte" => Some(("#EFF1F5", "#4C4F69", "#1E66F5")),
     _ => None,
   }
 }
@@ -68,6 +75,22 @@ mod tests {
     assert_eq!(
       theme_colors("ARGVUS Light Veil"),
       Some(("#ffffff", "#000000", DEFAULT_ACCENT))
+    );
+    assert_eq!(
+      theme_colors("argvus-frost-float"),
+      Some(("#f6f8fa", "#24292f", "#0969da"))
+    );
+    assert_eq!(
+      theme_colors("ARGVUS Catppuccin Latte"),
+      Some(("#EFF1F5", "#4C4F69", "#1E66F5"))
+    );
+    assert_eq!(
+      theme_colors("ARGVUS One Dark"),
+      Some(("#282C34", "#ABB2BF", "#61AFEF"))
+    );
+    assert_eq!(
+      theme_colors("ARGVUS Tokyo Night"),
+      Some(("#1A1B26", "#C0CAF5", "#7AA2F7"))
     );
   }
 }
