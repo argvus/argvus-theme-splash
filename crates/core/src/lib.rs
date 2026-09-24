@@ -27,6 +27,7 @@ pub fn theme_colors(theme: &str) -> Option<(&'static str, &'static str, &'static
     "dark-sunset" => Some(("#0F0F0F", "#EADCCC", "#E2BE8A")),
     "dark-hackerman" => Some(("#0B0C16", "#DDF7FF", "#82FB9C")),
     "catppuccin-latte" | "light-catppuccin-latte" => Some(("#EFF1F5", "#4C4F69", "#1E66F5")),
+    "light-gruvbox" => Some(("#FBF1C7", "#3C3836", "#458588")),
     _ => None,
   }
 }
@@ -129,6 +130,14 @@ mod tests {
     assert_eq!(
       theme_colors("argvus-dark-tokio-night-float"),
       Some(("#1A1B26", "#C0CAF5", "#7AA2F7"))
+    );
+  }
+
+  #[test]
+  fn maps_light_gruvbox_theme_names() {
+    assert_eq!(
+      theme_colors("ARGVUS Light Gruvbox Float"),
+      Some(("#FBF1C7", "#3C3836", "#458588"))
     );
   }
 }
