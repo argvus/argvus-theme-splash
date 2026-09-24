@@ -411,15 +411,12 @@ mod tests {
       ("ARGVUS Dark Aether", "#191b27", "#3590bd", DEFAULT_ACCENT),
       ("ARGVUS Dracula", "#282A36", "#F8F8F2", "#BD93F9"),
       ("argvus-dark-silver-float", "#595959", "#121518", "#121518"),
-      ("argvus-rosepine", "#191724", "#E0DEF4", "#C4A7E7"),
+      ("argvus-dark-rosepine", "#191724", "#E0DEF4", "#C4A7E7"),
       ("ARGVUS Dark Slate", "#3b4352", "#7391a5", DEFAULT_ACCENT),
       ("argvus-dark-universe", "#000000", "#ffffff", DEFAULT_ACCENT),
-      (
-        "argvus-gruvbox-dark-medium",
-        "#282828",
-        "#EBDBB2",
-        "#D79921",
-      ),
+      ("argvus-dark-gruvbox-high", "#282828", "#EBDBB2", "#D79921"),
+      ("argvus-dark-gruvbox", "#282828", "#EBDBB2", "#D4BE98"),
+      ("argvus-dark-solitude", "#101315", "#CACCCC", "#798186"),
       ("ARGVUS Light Veil", "#ffffff", "#000000", DEFAULT_ACCENT),
     ];
 
