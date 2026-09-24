@@ -26,7 +26,7 @@ pub fn theme_colors(theme: &str) -> Option<(&'static str, &'static str, &'static
     "solitude" | "dark-solitude" => Some(("#101315", "#CACCCC", "#798186")),
     "dark-sunset" => Some(("#0F0F0F", "#EADCCC", "#E2BE8A")),
     "dark-hackerman" => Some(("#0B0C16", "#DDF7FF", "#82FB9C")),
-    "light-catppuccin-latte" => Some(("#EFF1F5", "#4C4F69", "#1E66F5")),
+    "catppuccin-latte" | "light-catppuccin-latte" => Some(("#EFF1F5", "#4C4F69", "#1E66F5")),
     _ => None,
   }
 }
@@ -112,6 +112,10 @@ mod tests {
     );
     assert_eq!(
       theme_colors("ARGVUS Catppuccin Latte"),
+      Some(("#EFF1F5", "#4C4F69", "#1E66F5"))
+    );
+    assert_eq!(
+      theme_colors("argvus-light-catppuccin-latte-float"),
       Some(("#EFF1F5", "#4C4F69", "#1E66F5"))
     );
     assert_eq!(

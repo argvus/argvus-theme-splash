@@ -33,10 +33,10 @@ const FADE_OUT_MS: u32 = 220;
 struct Cli {
   #[arg(long)]
   theme: Option<String>,
-  #[arg(long, default_value = DEFAULT_BACKGROUND)]
-  background: String,
-  #[arg(long, default_value = DEFAULT_FOREGROUND)]
-  foreground: String,
+  #[arg(long)]
+  background: Option<String>,
+  #[arg(long)]
+  foreground: Option<String>,
   #[arg(long)]
   accent: Option<String>,
   #[arg(long)]
@@ -72,16 +72,23 @@ impl Palette {
       .as_deref()
       .map(ToOwned::to_owned)
       .unwrap_or_else(active_theme_name);
+    let mapped = argvus_theme_splash_core::theme_colors(&theme);
+    let fallback_background = mapped.map(|colors| colors.0).unwrap_or(DEFAULT_BACKGROUND);
+    let fallback_foreground = mapped.map(|colors| colors.1).unwrap_or(DEFAULT_FOREGROUND);
+    let fallback_accent = mapped.map(|colors| colors.2).unwrap_or(DEFAULT_ACCENT);
     let mut palette = Self {
-      background: argvus_theme_splash_core::valid_color(&cli.background, DEFAULT_BACKGROUND),
-      foreground: argvus_theme_splash_core::valid_color(&cli.foreground, DEFAULT_FOREGROUND),
-      accent: DEFAULT_ACCENT.to_owned(),
+      background: cli
+        .background
+        .as_deref()
+        .map(|value| argvus_theme_splash_core::valid_color(value, fallback_background))
+        .unwrap_or_else(|| fallback_background.to_owned()),
+      foreground: cli
+        .foreground
+        .as_deref()
+        .map(|value| argvus_theme_splash_core::valid_color(value, fallback_foreground))
+        .unwrap_or_else(|| fallback_foreground.to_owned()),
+      accent: fallback_accent.to_owned(),
     };
-    if let Some((background, foreground, accent)) = argvus_theme_splash_core::theme_colors(&theme) {
-      palette.background = background.to_owned();
-      palette.foreground = foreground.to_owned();
-      palette.accent = accent.to_owned();
-    }
     if let Some(accent) = cli.accent.as_deref() {
       palette.accent = argvus_theme_splash_core::valid_color(accent, &palette.accent);
     }
@@ -423,21 +430,32 @@ mod tests {
     ];
 
     for (theme, background, foreground, accent) in cases {
-      let cli = Cli::try_parse_from([
-        "argvus-theme-splash",
-        "--theme",
-        theme,
-        "--background",
-        "#abcdef",
-        "--foreground",
-        "#123456",
-      ])
-      .unwrap();
+      let cli = Cli::try_parse_from(["argvus-theme-splash", "--theme", theme]).unwrap();
       let palette = Palette::from_cli(&cli);
       assert_eq!(palette.background, background);
       assert_eq!(palette.foreground, foreground);
       assert_eq!(palette.accent, accent);
     }
+  }
+
+  #[test]
+  fn explicit_transition_colors_override_known_theme_fallbacks() {
+    let cli = Cli::try_parse_from([
+      "argvus-theme-splash",
+      "--theme",
+      "argvus-dark-silver",
+      "--background",
+      "#abcdef",
+      "--foreground",
+      "#123456",
+      "--accent",
+      "#654321",
+    ])
+    .unwrap();
+    let palette = Palette::from_cli(&cli);
+    assert_eq!(palette.background, "#abcdef");
+    assert_eq!(palette.foreground, "#123456");
+    assert_eq!(palette.accent, "#654321");
   }
 
   #[test]
