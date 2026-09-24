@@ -24,6 +24,8 @@ pub fn theme_colors(theme: &str) -> Option<(&'static str, &'static str, &'static
     "light-frost" => Some(("#f6f8fa", "#24292f", "#0969da")),
     "tokyo-night" | "dark-tokio-night" => Some(("#1A1B26", "#C0CAF5", "#7AA2F7")),
     "solitude" | "dark-solitude" => Some(("#101315", "#CACCCC", "#798186")),
+    "dark-sunset" => Some(("#0F0F0F", "#EADCCC", "#E2BE8A")),
+    "dark-hackerman" => Some(("#0B0C16", "#DDF7FF", "#82FB9C")),
     "light-catppuccin-latte" => Some(("#EFF1F5", "#4C4F69", "#1E66F5")),
     _ => None,
   }
@@ -87,6 +89,14 @@ mod tests {
     assert_eq!(
       theme_colors("argvus-dark-solitude"),
       Some(("#101315", "#CACCCC", "#798186"))
+    );
+    assert_eq!(
+      theme_colors("argvus-dark-sunset"),
+      Some(("#0F0F0F", "#EADCCC", "#E2BE8A"))
+    );
+    assert_eq!(
+      theme_colors("argvus-dark-hackerman"),
+      Some(("#0B0C16", "#DDF7FF", "#82FB9C"))
     );
     assert_eq!(
       theme_colors("ARGVUS GitHub Light"),

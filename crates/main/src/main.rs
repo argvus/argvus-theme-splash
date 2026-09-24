@@ -417,6 +417,8 @@ mod tests {
       ("argvus-dark-gruvbox-high", "#282828", "#EBDBB2", "#D79921"),
       ("argvus-dark-gruvbox", "#282828", "#EBDBB2", "#D4BE98"),
       ("argvus-dark-solitude", "#101315", "#CACCCC", "#798186"),
+      ("argvus-dark-sunset", "#0F0F0F", "#EADCCC", "#E2BE8A"),
+      ("argvus-dark-hackerman", "#0B0C16", "#DDF7FF", "#82FB9C"),
       ("ARGVUS Light Veil", "#ffffff", "#000000", DEFAULT_ACCENT),
     ];
 
