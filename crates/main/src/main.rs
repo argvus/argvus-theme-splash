@@ -426,6 +426,7 @@ mod tests {
       ("argvus-dark-solitude", "#101315", "#CACCCC", "#798186"),
       ("argvus-dark-sunset", "#0F0F0F", "#EADCCC", "#E2BE8A"),
       ("argvus-dark-hackerman", "#0B0C16", "#DDF7FF", "#82FB9C"),
+      ("argvus-dark-monokai", "#2D2A2E", "#FCFCFA", "#78DCE8"),
       ("ARGVUS Light Veil", "#ffffff", "#000000", DEFAULT_ACCENT),
     ];
 
