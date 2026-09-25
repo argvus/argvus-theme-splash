@@ -115,7 +115,7 @@ fn active_theme_name() -> String {
       let theme = theme.trim();
       (!theme.is_empty()).then(|| theme.to_owned())
     })
-    .unwrap_or_else(|| "argvus-dark-aether".to_owned())
+    .unwrap_or_else(|| "argvus-dark".to_owned())
 }
 
 fn css(palette: &Palette) -> String {
@@ -405,8 +405,7 @@ mod tests {
 
   #[test]
   fn cli_defaults_are_safe() {
-    let cli =
-      Cli::try_parse_from(["argvus-theme-splash", "--theme", "argvus-dark-aether"]).unwrap();
+    let cli = Cli::try_parse_from(["argvus-theme-splash", "--theme", "argvus-dark"]).unwrap();
     assert_eq!(Palette::from_cli(&cli).background, "#191b27");
     assert_eq!(Palette::from_cli(&cli).foreground, "#3590bd");
     assert_eq!(Palette::from_cli(&cli).accent, DEFAULT_ACCENT);
@@ -415,19 +414,19 @@ mod tests {
   #[test]
   fn known_theme_names_select_their_main_colors() {
     let cases = [
-      ("ARGVUS Dark Aether", "#191b27", "#3590bd", DEFAULT_ACCENT),
+      ("ARGVUS Dark", "#191b27", "#3590bd", DEFAULT_ACCENT),
       ("ARGVUS Dracula", "#282A36", "#F8F8F2", "#BD93F9"),
-      ("argvus-dark-silver-float", "#595959", "#121518", "#121518"),
-      ("argvus-dark-rosepine", "#191724", "#E0DEF4", "#C4A7E7"),
+      ("silver-dark-float", "#595959", "#121518", "#121518"),
+      ("rose-pine", "#191724", "#E0DEF4", "#C4A7E7"),
       ("ARGVUS Dark Slate", "#3b4352", "#7391a5", DEFAULT_ACCENT),
-      ("argvus-dark-universe", "#000000", "#ffffff", DEFAULT_ACCENT),
-      ("argvus-dark-gruvbox-high", "#282828", "#EBDBB2", "#D79921"),
-      ("argvus-dark-gruvbox", "#282828", "#EBDBB2", "#D4BE98"),
-      ("argvus-dark-solitude", "#101315", "#CACCCC", "#798186"),
-      ("argvus-dark-sunset", "#0F0F0F", "#EADCCC", "#E2BE8A"),
-      ("argvus-dark-hackerman", "#0B0C16", "#DDF7FF", "#82FB9C"),
-      ("argvus-dark-monokai", "#2D2A2E", "#FCFCFA", "#78DCE8"),
-      ("ARGVUS Light Veil", "#ffffff", "#000000", DEFAULT_ACCENT),
+      ("universe", "#000000", "#ffffff", DEFAULT_ACCENT),
+      ("gruvbox-high-dark", "#282828", "#EBDBB2", "#D79921"),
+      ("gruvbox-dark", "#282828", "#EBDBB2", "#D4BE98"),
+      ("solitude", "#101315", "#CACCCC", "#798186"),
+      ("sunset", "#0F0F0F", "#EADCCC", "#E2BE8A"),
+      ("hackerman", "#0B0C16", "#DDF7FF", "#82FB9C"),
+      ("monokai-dark", "#2D2A2E", "#FCFCFA", "#78DCE8"),
+      ("ARGVUS Light", "#ffffff", "#000000", DEFAULT_ACCENT),
     ];
 
     for (theme, background, foreground, accent) in cases {
@@ -444,7 +443,7 @@ mod tests {
     let cli = Cli::try_parse_from([
       "argvus-theme-splash",
       "--theme",
-      "argvus-dark-silver",
+      "silver-dark",
       "--background",
       "#abcdef",
       "--foreground",
@@ -464,7 +463,7 @@ mod tests {
     let cli = Cli::try_parse_from([
       "argvus-theme-splash",
       "--theme",
-      "argvus-dark-silver",
+      "silver-dark",
       "--accent",
       "#123456",
     ])

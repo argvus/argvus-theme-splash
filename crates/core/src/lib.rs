@@ -11,24 +11,26 @@ pub fn theme_colors(theme: &str) -> Option<(&'static str, &'static str, &'static
   match normalized {
     "onedark" | "one-dark" => Some(("#282C34", "#ABB2BF", "#61AFEF")),
     "dracula" => Some(("#282A36", "#F8F8F2", "#BD93F9")),
-    "dark-aether" => Some(("#191b27", "#3590bd", DEFAULT_ACCENT)),
-    "dark-silver" => Some(("#595959", "#121518", "#121518")),
-    "dark-rosepine" => Some(("#191724", "#E0DEF4", "#C4A7E7")),
-    "dark-slate" => Some(("#3b4352", "#7391a5", DEFAULT_ACCENT)),
-    "dark-universe" => Some(("#000000", "#ffffff", DEFAULT_ACCENT)),
-    "dark-gruvbox-high" => Some(("#282828", "#EBDBB2", "#D79921")),
-    "dark-gruvbox" => Some(("#282828", "#EBDBB2", "#D4BE98")),
-    "light-veil" => Some(("#ffffff", "#000000", DEFAULT_ACCENT)),
+    "dark" | "dark-aether" => Some(("#191b27", "#3590bd", DEFAULT_ACCENT)),
+    "silver-dark" | "dark-silver" => Some(("#595959", "#121518", "#121518")),
+    "rose-pine" | "dark-rose-pine" => Some(("#191724", "#E0DEF4", "#C4A7E7")),
+    "slate-dark" | "dark-slate" => Some(("#3b4352", "#7391a5", DEFAULT_ACCENT)),
+    "universe" | "dark-universe" => Some(("#000000", "#ffffff", DEFAULT_ACCENT)),
+    "gruvbox-high-dark" | "dark-gruvbox-high" => Some(("#282828", "#EBDBB2", "#D79921")),
+    "gruvbox-dark" | "dark-gruvbox" => Some(("#282828", "#EBDBB2", "#D4BE98")),
+    "light" | "light-veil" => Some(("#ffffff", "#000000", DEFAULT_ACCENT)),
     "github-light" => Some(("#FFFFFF", "#1F2328", "#0969DA")),
     "solarized-light" | "light-solarized" => Some(("#FDF6E3", "#657B83", "#268BD2")),
-    "light-frost" => Some(("#f6f8fa", "#24292f", "#0969da")),
+    "frost" | "light-frost" => Some(("#f6f8fa", "#24292f", "#0969da")),
     "tokyo-night" | "dark-tokio-night" => Some(("#1A1B26", "#C0CAF5", "#7AA2F7")),
     "solitude" | "dark-solitude" => Some(("#101315", "#CACCCC", "#798186")),
-    "dark-sunset" => Some(("#0F0F0F", "#EADCCC", "#E2BE8A")),
-    "dark-hackerman" => Some(("#0B0C16", "#DDF7FF", "#82FB9C")),
-    "dark-monokai" => Some(("#2D2A2E", "#FCFCFA", "#78DCE8")),
-    "catppuccin-latte" | "light-catppuccin-latte" => Some(("#EFF1F5", "#4C4F69", "#1E66F5")),
-    "light-gruvbox" => Some(("#FBF1C7", "#3C3836", "#458588")),
+    "sunset" | "dark-sunset" => Some(("#0F0F0F", "#EADCCC", "#E2BE8A")),
+    "hackerman" | "dark-hackerman" => Some(("#0B0C16", "#DDF7FF", "#82FB9C")),
+    "monokai-dark" | "dark-monokai" => Some(("#2D2A2E", "#FCFCFA", "#78DCE8")),
+    "catppuccin-latte" | "light-catppuccin-latte" | "dark-catppuccin-latte" => {
+      Some(("#EFF1F5", "#4C4F69", "#1E66F5"))
+    }
+    "gruvbox-light" | "light-gruvbox" => Some(("#FBF1C7", "#3C3836", "#458588")),
     _ => None,
   }
 }
@@ -73,35 +75,35 @@ mod tests {
   #[test]
   fn maps_supported_theme_names() {
     assert_eq!(
-      theme_colors("ARGVUS Dark Aether"),
+      theme_colors("ARGVUS Dark"),
       Some(("#191b27", "#3590bd", DEFAULT_ACCENT))
     );
     assert_eq!(
-      theme_colors("argvus-dark-silver-float"),
+      theme_colors("silver-dark-float"),
       Some(("#595959", "#121518", "#121518"))
     );
     assert_eq!(
-      theme_colors("ARGVUS Light Veil"),
+      theme_colors("ARGVUS Light"),
       Some(("#ffffff", "#000000", DEFAULT_ACCENT))
     );
     assert_eq!(
-      theme_colors("argvus-light-frost-float"),
+      theme_colors("frost-float"),
       Some(("#f6f8fa", "#24292f", "#0969da"))
     );
     assert_eq!(
-      theme_colors("argvus-dark-solitude"),
+      theme_colors("solitude"),
       Some(("#101315", "#CACCCC", "#798186"))
     );
     assert_eq!(
-      theme_colors("argvus-dark-sunset"),
+      theme_colors("sunset"),
       Some(("#0F0F0F", "#EADCCC", "#E2BE8A"))
     );
     assert_eq!(
-      theme_colors("argvus-dark-hackerman"),
+      theme_colors("hackerman"),
       Some(("#0B0C16", "#DDF7FF", "#82FB9C"))
     );
     assert_eq!(
-      theme_colors("argvus-dark-monokai"),
+      theme_colors("monokai-dark"),
       Some(("#2D2A2E", "#FCFCFA", "#78DCE8"))
     );
     assert_eq!(
@@ -113,11 +115,15 @@ mod tests {
       Some(("#FDF6E3", "#657B83", "#268BD2"))
     );
     assert_eq!(
-      theme_colors("argvus-light-solarized"),
+      theme_colors("solarized-light"),
       Some(("#FDF6E3", "#657B83", "#268BD2"))
     );
     assert_eq!(
       theme_colors("ARGVUS Catppuccin Latte"),
+      Some(("#EFF1F5", "#4C4F69", "#1E66F5"))
+    );
+    assert_eq!(
+      theme_colors("catppuccin-latte-float"),
       Some(("#EFF1F5", "#4C4F69", "#1E66F5"))
     );
     assert_eq!(
@@ -133,7 +139,7 @@ mod tests {
       Some(("#1A1B26", "#C0CAF5", "#7AA2F7"))
     );
     assert_eq!(
-      theme_colors("argvus-dark-tokio-night-float"),
+      theme_colors("tokyo-night-float"),
       Some(("#1A1B26", "#C0CAF5", "#7AA2F7"))
     );
   }
