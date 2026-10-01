@@ -13,7 +13,7 @@ use std::{
 };
 
 use argvus_i18n::I18n;
-use argvus_theme_splash_core::{DEFAULT_ACCENT, DEFAULT_BACKGROUND, DEFAULT_FOREGROUND};
+use argvus_loading_theme_core::{DEFAULT_ACCENT, DEFAULT_BACKGROUND, DEFAULT_FOREGROUND};
 use clap::Parser;
 use gtk::{
   Align, Application, ApplicationWindow, Box as GtkBox, Label, Orientation, Spinner, gdk, glib,
@@ -21,13 +21,13 @@ use gtk::{
 };
 use gtk4_layer_shell::{Edge, KeyboardMode, Layer, LayerShell};
 
-const APP_ID: &str = "org.argvus.ThemeSplash";
+const APP_ID: &str = "org.argvus.LoadingTheme";
 const FADE_IN_MS: u32 = 180;
 const FADE_OUT_MS: u32 = 220;
 
 #[derive(Debug, Parser, Clone)]
 #[command(
-  name = "argvus-theme-splash",
+  name = "argvus-loading-theme",
   about = "Overlay shown while ARGVUS changes theme or starts the desktop"
 )]
 struct Cli {
@@ -72,7 +72,7 @@ impl Palette {
       .as_deref()
       .map(ToOwned::to_owned)
       .unwrap_or_else(active_theme_name);
-    let mapped = argvus_theme_splash_core::theme_colors(&theme);
+    let mapped = argvus_loading_theme_core::theme_colors(&theme);
     let fallback_background = mapped.map(|colors| colors.0).unwrap_or(DEFAULT_BACKGROUND);
     let fallback_foreground = mapped.map(|colors| colors.1).unwrap_or(DEFAULT_FOREGROUND);
     let fallback_accent = mapped.map(|colors| colors.2).unwrap_or(DEFAULT_ACCENT);
@@ -80,17 +80,17 @@ impl Palette {
       background: cli
         .background
         .as_deref()
-        .map(|value| argvus_theme_splash_core::valid_color(value, fallback_background))
+        .map(|value| argvus_loading_theme_core::valid_color(value, fallback_background))
         .unwrap_or_else(|| fallback_background.to_owned()),
       foreground: cli
         .foreground
         .as_deref()
-        .map(|value| argvus_theme_splash_core::valid_color(value, fallback_foreground))
+        .map(|value| argvus_loading_theme_core::valid_color(value, fallback_foreground))
         .unwrap_or_else(|| fallback_foreground.to_owned()),
       accent: fallback_accent.to_owned(),
     };
     if let Some(accent) = cli.accent.as_deref() {
-      palette.accent = argvus_theme_splash_core::valid_color(accent, &palette.accent);
+      palette.accent = argvus_loading_theme_core::valid_color(accent, &palette.accent);
     }
     palette
   }
@@ -109,7 +109,7 @@ fn active_theme_name() -> String {
     .map(std::path::PathBuf::from);
 
   config_home
-    .map(|path| path.join("argvus/.active-theme"))
+    .map(|path| path.join("argvus/data/.active-theme"))
     .and_then(|path| std::fs::read_to_string(path).ok())
     .and_then(|theme| {
       let theme = theme.trim();
@@ -191,7 +191,7 @@ fn build_surfaces(application: &Application, cli: &Cli, palette: &Palette) {
         if *pending == 0 {
           let monotonic_ns = monotonic_ns();
           eprintln!(
-            "argvus-theme-splash: monotonic_ns={monotonic_ns} first layer-shell frame callback"
+            "argvus-loading-theme: monotonic_ns={monotonic_ns} first layer-shell frame callback"
           );
           signal_ready(ready_file.as_deref(), ready_fd);
         }
@@ -226,7 +226,7 @@ fn make_surface(
     .focus_on_click(false)
     .build();
   window.init_layer_shell();
-  window.set_namespace(Some("argvus-theme-splash"));
+  window.set_namespace(Some("argvus-loading-theme"));
   window.set_layer(Layer::Overlay);
   window.set_monitor(Some(monitor));
   window.set_keyboard_mode(KeyboardMode::None);
@@ -374,15 +374,15 @@ mod tests {
   #[test]
   fn accepts_supported_hex_colors() {
     assert_eq!(
-      argvus_theme_splash_core::valid_color("#abc", DEFAULT_BACKGROUND),
+      argvus_loading_theme_core::valid_color("#abc", DEFAULT_BACKGROUND),
       "#abc"
     );
     assert_eq!(
-      argvus_theme_splash_core::valid_color("#AABBCC", DEFAULT_BACKGROUND),
+      argvus_loading_theme_core::valid_color("#AABBCC", DEFAULT_BACKGROUND),
       "#AABBCC"
     );
     assert_eq!(
-      argvus_theme_splash_core::valid_color("#AABBCCDD", DEFAULT_BACKGROUND),
+      argvus_loading_theme_core::valid_color("#AABBCCDD", DEFAULT_BACKGROUND),
       "#AABBCCDD"
     );
   }
@@ -390,22 +390,22 @@ mod tests {
   #[test]
   fn rejects_css_injection_and_bad_lengths() {
     assert_eq!(
-      argvus_theme_splash_core::valid_color("red", DEFAULT_BACKGROUND),
+      argvus_loading_theme_core::valid_color("red", DEFAULT_BACKGROUND),
       DEFAULT_BACKGROUND
     );
     assert_eq!(
-      argvus_theme_splash_core::valid_color("#123456;", DEFAULT_BACKGROUND),
+      argvus_loading_theme_core::valid_color("#123456;", DEFAULT_BACKGROUND),
       DEFAULT_BACKGROUND
     );
     assert_eq!(
-      argvus_theme_splash_core::valid_color("#12345", DEFAULT_BACKGROUND),
+      argvus_loading_theme_core::valid_color("#12345", DEFAULT_BACKGROUND),
       DEFAULT_BACKGROUND
     );
   }
 
   #[test]
   fn cli_defaults_are_safe() {
-    let cli = Cli::try_parse_from(["argvus-theme-splash", "--theme", "argvus-dark"]).unwrap();
+    let cli = Cli::try_parse_from(["argvus-loading-theme", "--theme", "argvus-dark"]).unwrap();
     assert_eq!(Palette::from_cli(&cli).background, "#191b27");
     assert_eq!(Palette::from_cli(&cli).foreground, "#3590bd");
     assert_eq!(Palette::from_cli(&cli).accent, DEFAULT_ACCENT);
@@ -430,7 +430,7 @@ mod tests {
     ];
 
     for (theme, background, foreground, accent) in cases {
-      let cli = Cli::try_parse_from(["argvus-theme-splash", "--theme", theme]).unwrap();
+      let cli = Cli::try_parse_from(["argvus-loading-theme", "--theme", theme]).unwrap();
       let palette = Palette::from_cli(&cli);
       assert_eq!(palette.background, background);
       assert_eq!(palette.foreground, foreground);
@@ -441,7 +441,7 @@ mod tests {
   #[test]
   fn explicit_transition_colors_override_known_theme_fallbacks() {
     let cli = Cli::try_parse_from([
-      "argvus-theme-splash",
+      "argvus-loading-theme",
       "--theme",
       "silver-dark",
       "--background",
@@ -461,7 +461,7 @@ mod tests {
   #[test]
   fn explicit_accent_overrides_known_theme_accent() {
     let cli = Cli::try_parse_from([
-      "argvus-theme-splash",
+      "argvus-loading-theme",
       "--theme",
       "silver-dark",
       "--accent",
@@ -474,7 +474,7 @@ mod tests {
   #[test]
   fn unknown_theme_keeps_explicit_cli_colors() {
     let cli = Cli::try_parse_from([
-      "argvus-theme-splash",
+      "argvus-loading-theme",
       "--theme",
       "custom-theme",
       "--background",

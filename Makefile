@@ -75,8 +75,8 @@ install: build-bin
 	@sudo pacman -U build/dist/argvus*.zst --noconfirm --overwrite="*"
 
 uninstall:
-	$(RM) "$(DESTDIR)$(PREFIX)/lib/argvus/theme-splash/splash"
-	rm -rf "$(DESTDIR)$(PREFIX)/share/licenses/argvus-theme-splash"
+	$(RM) "$(DESTDIR)$(PREFIX)/lib/argvus/loading-theme/splash"
+	rm -rf "$(DESTDIR)$(PREFIX)/share/licenses/argvus-loading-theme"
 
 reinstall: uninstall install
 
