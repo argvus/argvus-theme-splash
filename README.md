@@ -1,10 +1,10 @@
-# argvus-theme-splash
+# argvus-loading-theme
 
 GTK4 Wayland layer-shell overlay displayed while ARGVUS applies a theme or
 starts the desktop session.
 
 The executable is an internal desktop component and is installed at
-`/usr/lib/argvus/theme-splash/splash`; it is intentionally not placed in
+`/usr/lib/argvus/loading-theme/splash`; it is intentionally not placed in
 `/usr/bin`.
 
 The session loading path invokes the same binary with `--spinner-only`. In
